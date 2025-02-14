@@ -1,7 +1,6 @@
 import express from 'express';
-import mongoDB from "./config/mongoDB.mjs";
-import ShortnerModel from './schemas/ShortnerModel.mjs';
-import ShortnerTrackerModel from './schemas/ShortnerTrackerModel.mjs';
+/* import ShortnerTrackerModel from './schemas/ShortnerTrackerModel.mjs'; */
+import fetch from 'node-fetch';
 
 const app = express();
 
@@ -11,15 +10,18 @@ app.get("/", (req, res) => {
 
 app.get('/:shortUrl', async (req, res) => {
     let {shortUrl} = req.params;
-    let data = await ShortnerModel.findOne({shortUrl});
-    if(data){
-        await ShortnerTrackerModel.create({url_id: data._id});
-        res.redirect(301, data.url);
-    }else{
+    try{
+        let data = await fetch(`${process.env.API_URL}shortner/${shortUrl}`).then(res => res.json());
+        if(data.url){
+            res.redirect(301, data.url);
+        }else{
+            res.redirect(301, `${process.env.BASE_URL}${shortUrl}`);
+        }
+    }catch(e){
         res.redirect(301, `${process.env.BASE_URL}${shortUrl}`);
     }
 });
 
 app.listen(process.env.PORT, () => {
-  mongoDB.connect();
+    console.log(`Server is running on port ${process.env.PORT}`);
 });
