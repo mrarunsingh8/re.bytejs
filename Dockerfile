@@ -8,7 +8,6 @@ COPY package*.json .
 
 RUN npm install --only=production --ignore-scripts
 
-COPY ./config ./config
 COPY ./schemas ./schemas
 COPY ./index.mjs .
 
